@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:DataRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:effect="effect.*"
+		 creationComplete="doAnimation(area,event)">
+
+	<fx:Style>
+		.mapInfo {
+            fontFamily: "Arial";
+			color: #BB861C;
+			backgroundColor: #fffbd6;
+            fontSize: 10px;
+        }
+	</fx:Style>
+
+    <s:states>
+        <s:State name="normal"/>
+        <s:State name="hovered"/>
+    </s:states>
+
+    <fx:Declarations>
+        <fx:XML id="mapData" source="../assets/mapData.xml" />
+    </fx:Declarations>
+	
+	<fx:Declarations>
+		<effect:FaderEffect id="faderEffect" finalAlpha="1" target="{mapGroup}" /> 
+		
+
+		<s:Animate id="blinker"
+			duration="500"
+			repeatBehavior="reverse"
+			repeatCount="0"
+			target="{areaNameLabel}">
+			<s:SimpleMotionPath property="alpha" valueFrom="1.0" valueTo="0.0" />
+		</s:Animate>
+		
+		<!--
+		<s:Parallel id="transformer" target="{button}">
+		<s:Move xFrom="50" xTo="150" autoCenterTransform="true"/>
+		<s:Rotate angleFrom="0" angleTo="90" autoCenterTransform="true"/>
+		<s:Scale scaleXFrom="1" scaleXTo="2" autoCenterTransform="true"/>
+		</s:Parallel>
+		-->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.ToolTip;
+			import mx.core.IToolTip;
+			import mx.events.FlexEvent;
+			import mx.managers.ToolTipManager;
+            import mx.collections.XMLListCollection;
+
+			import valueObjects.Area;
+
+			public var mapTip:IToolTip;
+			
+			
+			[Bindable]
+			public var area:Area;
+
+            private var categories:XMLListCollection;
+
+			public override function set data( value:Object ):void{
+				this.area = value as Area;
+			}
+
+			private function showInfo ( area:Area, event:MouseEvent ) : void {
+                if ( area.areaData == null ) return;
+                this.currentState = 'hovered';
+                mapTip = ToolTipManager.createToolTip(area.areaData.toString(),
+                        event.stageX  + 10,
+                        event.stageY);
+
+                mapTip.alpha = .6;
+                (mapTip as ToolTip).setStyle("styleName","mapInfo");
+            }
+
+            private function hideInfo ( event:MouseEvent ) : void {
+                if ( mapTip == null ) return;
+                this.currentState = ''; // 重置视图状态
+                ToolTipManager.destroyToolTip(mapTip);
+            }
+
+            private function doAnimation ( area:Area, event:FlexEvent ) : void {
+                faderEffect.play();
+
+                if(area.areaData != null) {
+                    blinker.play();
+                }
+            }
+
+            private function goUrl ( area:Area ) : void {
+                if ( area.areaData == null ) return;
+                navigateToURL(new URLRequest(area.areaData.url), "_blank");
+            }
+		]]>
+	</fx:Script>
+	
+	
+	
+	<!--TODO:layer order transform-->
+	<!--使用SkinnableContainer避免Group引起的非path也有事件的问题-->
+	<s:SkinnableContainer  id="mapGroup" alpha="0.2" mouseOver="showInfo(area,event)" mouseOut="hideInfo(event)" click="goUrl(area)">
+		<s:Path id="areaPath" data="{area.path}" alpha.hovered="0.7">
+
+			<s:stroke>
+				<s:SolidColorStroke color="#dddddd" weight="1" weight.hovered="2" caps="square" joints="miter" />
+			</s:stroke>
+			<s:fill>
+				<s:SolidColor color="#66cbff" />
+			</s:fill>
+		</s:Path>
+		
+		<s:Label id="areaNameLabel" text="{area.areaName}" x="{area.pos.x}" y="{area.pos.y}" />
+	</s:SkinnableContainer>
+</s:DataRenderer>

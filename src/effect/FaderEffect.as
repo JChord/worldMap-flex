@@ -1,0 +1,4 @@
+package effect {	import mx.effects.IEffectInstance;
+	
+	import spark.effects.Animate;
+		public class FaderEffect extends Animate {		public var finalAlpha:Number;						public function FaderEffect (target:Object=null) {			super(target);			trace("FaderEffect");			this.instanceClass = CustomAnimateInstance;					}		// create our new instance		override protected function initInstance(instance:IEffectInstance):void {			trace("initInstance");			super.initInstance(instance);			var animateInstance:CustomAnimateInstance = CustomAnimateInstance(instance);			animateInstance.finalAlpha = this.finalAlpha;		}		override public function getAffectedProperties():Array {			trace("getAffectedProperties");			return ["alpha"];		}	}}
