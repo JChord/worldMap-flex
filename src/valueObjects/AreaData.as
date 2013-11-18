@@ -29,6 +29,18 @@ package valueObjects {
             return areaData;
         }
 
+        public static function buildAreaFromJSON ( json:Object ) : AreaData  {
+            var areaData:AreaData = new AreaData(
+                    json['id'],
+                    json['city'],
+                    json['alias'],
+                    json['score'],
+                    json['content'],
+                    json['url']
+            );
+            return areaData;
+        }
+
         public function toString():String {
             return "city:" + this.city + "\n"
                    +"alias:" + this.alias + "\n"

@@ -20,7 +20,6 @@ package valueObjects {
 		}
 		
 		public static function buildAreaFromAttributes ( mapDataXML:XML, areaDatasList:XMLList ) : Area {
-			var pos:Pos = new Pos(mapDataXML.pos.@x, mapDataXML.pos.@y);
             var areaData:AreaData;
             for each ( var areaDataXML:XML in areaDatasList ) {
                 if ( mapDataXML.@id == areaDataXML.@id ) {
@@ -28,6 +27,8 @@ package valueObjects {
                     break;
                 }
             }
+
+            var pos:Pos = new Pos(mapDataXML.pos.@x, mapDataXML.pos.@y);
 
 			var area:Area = new Area(
                 mapDataXML.@id,
@@ -41,6 +42,29 @@ package valueObjects {
 			return area;
 		}
 
+        public static function buildAreaFromJSON ( mapDataXML:XML, areaDatasJSON:Object ) : Area {
+            var areaData:AreaData;
+
+            for  (var id:String in areaDatasJSON) {
+                if ( mapDataXML.@id == id ) {
+                    areaData = AreaData.buildAreaFromJSON(areaDatasJSON[id]);
+                    break;
+                }
+            }
+
+            var pos:Pos = new Pos(mapDataXML.pos.@x, mapDataXML.pos.@y);
+
+            var area:Area = new Area(
+                    mapDataXML.@id,
+                    mapDataXML.@areaName,
+                    pos,
+                    mapDataXML.path,
+                    mapDataXML.subArea,
+                    areaData
+            );
+
+            return area;
+        }
 
 	}
 }

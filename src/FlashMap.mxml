@@ -8,30 +8,95 @@
 	<fx:Declarations>
 		<fx:XML id="mapData" source="assets/mapData.xml" />
         <fx:XML id="areaData" source="assets/areaData.xml"/>
+
+        <s:HTTPService id="mapDataService"
+                       useProxy="false"
+                       url="{mapDataUrl}"
+                       resultFormat="e4x"
+                       result="getMapDataFromRemote(event)"
+                       fault="createMap()"
+                ></s:HTTPService>
+
+        <s:HTTPService id="areaDataService"
+                       showBusyCursor="true"
+                       useProxy="false"
+                       url="{areaDataUrl}"
+                       result="handleAreaDataResult(event)"
+                       fault="parseAreasFromXML()"
+                ></s:HTTPService>
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
+            import mx.rpc.events.ResultEvent;
+            import mx.core.FlexGlobals;
 			
 			import valueObjects.Area;
 			
 			[Bindable]
 			public var areas:ArrayCollection;
-			
+
+            [Bindable]
+            public var mapDataUrl:String;
+
+            [Bindable]
+            public var areaDataUrl:String;
+
+            private var mapDataFinal:XML;
 			
 			private function handleCreationComplete ( event:FlexEvent ) : void {
-				var areasArray:Array = new Array();
-				var mapDataList:XMLList = mapData.areas[0]..area;
-                var areaDataList:XMLList = areaData..areaData;
-				for each ( var mapDataXML:XML in mapDataList ) {
-					var area:Area = Area.buildAreaFromAttributes(mapDataXML, areaDataList);
-					areasArray.push( area );
-				}
-				
-				areas = new ArrayCollection( areasArray );
-				
+                mapDataUrl = FlexGlobals.topLevelApplication.parameters.mapDataUrl;
+                if ( mapDataUrl != null ) {
+                    mapDataService.send();
+                } else {
+                    mapDataFinal = mapData;
+                    createMap();
+                }
 			}
+
+            private function getMapDataFromRemote(event:ResultEvent) : void {
+                mapDataFinal = event.result as XML;
+                createMap();
+            }
+
+            private function createMap() : void {
+                areaDataUrl = FlexGlobals.topLevelApplication.parameters.areaDataUrl;
+
+                if ( areaDataUrl != null ) {
+                    areaDataService.send();
+                } else {
+                    parseAreasFromXML();
+                }
+            }
+
+            private function handleAreaDataResult(event:ResultEvent) : void{
+                parseAreasFromJSON(event);
+            }
+
+            private function parseAreasFromXML() : void {
+                var areasArray:Array = new Array();
+                var mapDataList:XMLList = mapDataFinal.areas[0]..area;
+                var areaDataList:XMLList = areaData..areaData;
+                for each ( var mapDataXML:XML in mapDataList ) {
+                    var area:Area = Area.buildAreaFromAttributes(mapDataXML, areaDataList);
+                    areasArray.push( area );
+                }
+
+                areas = new ArrayCollection( areasArray );
+            }
+
+            private function parseAreasFromJSON(event:ResultEvent) : void {
+                var areasArray:Array = new Array();
+                var mapDataList:XMLList = mapDataFinal.areas[0]..area;
+                var jsonObj:Object = JSON.parse(event.result.toString());
+                for each ( var mapDataXML:XML in mapDataList ) {
+                    var area:Area = Area.buildAreaFromJSON(mapDataXML, jsonObj);
+                    areasArray.push( area );
+                }
+
+                areas = new ArrayCollection( areasArray );
+            }
 		]]>
 	</fx:Script>
 	

@@ -102,8 +102,7 @@
 	<!--TODO:layer order transform-->
 	<!--使用SkinnableContainer避免Group引起的非path也有事件的问题-->
 	<s:SkinnableContainer  id="mapGroup" alpha="0.2" mouseOver="showInfo(area,event)" mouseOut="hideInfo(event)" click="goUrl(area)">
-		<s:Path id="areaPath" data="{area.path}" alpha.hovered="0.7">
-
+		<s:Path id="areaPath" data="{area.path}" alpha.hovered="0.7" depth="1">
 			<s:stroke>
 				<s:SolidColorStroke color="#dddddd" weight="1" weight.hovered="2" caps="square" joints="miter" />
 			</s:stroke>
@@ -112,6 +111,6 @@
 			</s:fill>
 		</s:Path>
 		
-		<s:Label id="areaNameLabel" text="{area.areaName}" x="{area.pos.x}" y="{area.pos.y}" />
+		<s:Label id="areaNameLabel" text="{area.areaName}" x="{area.pos.x}" y="{area.pos.y}" depth="2" />
 	</s:SkinnableContainer>
 </s:DataRenderer>
